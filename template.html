@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="ad.size" content="width=@@WIDTH@@,height=@@HEIGHT@@" />
+    <title>@@TITLE@@</title>
+
+    <!-- CM360 clickTag -->
+    <script>
+      var clickTag = "https://www.example.com";
+    </script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+      }
+
+      /*
+        Browser preview wrapper.
+        Keeps the ad at @@W_OVER_H@@ while scaling to fit the screen.
+      */
+      #ad-wrapper {
+        position: relative;
+        width: min(100vw, calc(100vh * @@W_OVER_H@@));
+        height: min(100vh, calc(100vw * @@H_OVER_W@@));
+        overflow: hidden;
+        background: #000;
+      }
+
+      /* Internal design stage. Keep this fixed at the actual creative size. */
+      #ad-stage {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: @@WIDTH@@px;
+        height: @@HEIGHT@@px;
+        overflow: hidden;
+        transform-origin: 0 0;
+        background: #000;
+      }
+
+      .video-bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #000;
+      }
+
+      .headline {
+        margin: 0 0 24px;
+        color: #fff;
+        font-size: 44px;
+        line-height: 0.95;
+        font-weight: 800;
+        text-transform: uppercase;
+        text-align: right;
+        letter-spacing: -1.5px;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+      }
+
+      /* Shared CTA box styling -- position is set per-orientation below. */
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 168px;
+        min-height: 54px;
+        padding: 12px 32px;
+        background: #fff;
+        color: #111;
+        border-radius: 4px;
+        font-size: 20px;
+        line-height: 1;
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+        pointer-events: none;
+        position: absolute;
+        z-index: 15;
+        opacity: 1;
+      }
+
+      /*
+        Landscape (e.g. 16:9): CTA sits mid-right over the video,
+        matching the original placement.
+      */
+      body.landscape .cta {
+        right: 18.2%;
+        top: 55%;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      /*
+        Portrait (e.g. 3:4, 9:16): CTA sits bottom-center, clear of
+        the warning bar.
+      */
+      body.portrait .cta {
+        left: 50%;
+        bottom: 150px;
+        transform: translate(-50%, 0) scale(1);
+      }
+
+      /* This literally display:none hides the CTA. */
+      .cta.is-hidden {
+        display: none;
+      }
+
+      /* This gets added at @@CTA_SHOW_AGAIN@@s. */
+      .cta.grow-fade-in {
+        display: inline-flex;
+      }
+
+      body.landscape .cta.grow-fade-in {
+        animation: growFadeInLandscape 0.45s ease-out forwards;
+      }
+
+      body.portrait .cta.grow-fade-in {
+        animation: growFadeInPortrait 0.45s ease-out forwards;
+      }
+
+      @keyframes growFadeInLandscape {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.72);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+
+      @keyframes growFadeInPortrait {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 0) scale(0.72);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0) scale(1);
+        }
+      }
+
+      .warning {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        min-height: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 18px 38px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        font-size: 18px;
+        line-height: 1.14;
+        font-weight: 400;
+        text-transform: uppercase;
+        z-index: 5;
+        pointer-events: none;
+      }
+
+      /* Full clickable layer for CM360 click tracking. */
+      .click-layer {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        display: block;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0);
+      }
+
+      /* Optional border to show creative bounds. Remove before final upload if not needed. */
+      .safe-frame {
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        z-index: 30;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body class="@@ORIENTATION@@">
+    <div id="ad-wrapper">
+      <div id="ad-stage">
+
+        <!-- Replace the source file with the actual exported video. Keep it inside the same zip folder as index.html. -->
+        <video
+          id="main-video"
+          class="video-bg"
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+        >
+          <source src="@@WEBM_FILENAME@@" type="video/webm" />
+        </video>
+
+        <div class="cta" id="cta">Learn More</div>
+
+        <div class="warning">
+          <p>
+            <strong>GOVERNMENT WARNING:</strong> THIS PRODUCT IS HARMFUL AND
+            CONTAINS NICOTINE WHICH IS A HIGHLY ADDICTIVE SUBSTANCE.<br />
+            THIS IS FOR USE ONLY BY ADULTS AND IS NOT RECOMMENDED FOR USE BY
+            NONSMOKERS.
+          </p>
+        </div>
+
+        <a
+          class="click-layer"
+          href="javascript:window.open(window.clickTag, '_blank')"
+          aria-label="Learn more"
+        ></a>
+
+        <div class="safe-frame"></div>
+      </div>
+    </div>
+
+    <script>
+      const DESIGN_WIDTH      = @@WIDTH@@;
+      const DESIGN_HEIGHT     = @@HEIGHT@@;
+      const CTA_HIDE_AT       = @@CTA_HIDE_AT@@;
+      const CTA_SHOW_AGAIN_AT = @@CTA_SHOW_AGAIN@@;
+      const ORIENTATION       = "@@ORIENTATION@@"; // "landscape" or "portrait"
+
+      // Same base transform used by the CSS rules above -- kept in sync
+      // here because showCTAInitial() sets an inline style directly.
+      const CTA_BASE_TRANSFORM =
+        ORIENTATION === "portrait"
+          ? "translate(-50%, 0)"
+          : "translate(-50%, -50%)";
+
+      const wrapper = document.getElementById("ad-wrapper");
+      const stage   = document.getElementById("ad-stage");
+      const video   = document.getElementById("main-video");
+      const cta     = document.getElementById("cta");
+
+      let currentCTAPhase = "";
+      let rafId = null;
+
+      function resizeStage() {
+        const rect  = wrapper.getBoundingClientRect();
+        const scale = Math.min(
+          rect.width  / DESIGN_WIDTH,
+          rect.height / DESIGN_HEIGHT,
+        );
+        stage.style.transform = `scale(${scale})`;
+      }
+
+      function showCTAInitial() {
+        if (currentCTAPhase === "initial") return;
+        currentCTAPhase = "initial";
+        cta.classList.remove("is-hidden", "grow-fade-in");
+        cta.style.opacity   = "1";
+        cta.style.transform = `${CTA_BASE_TRANSFORM} scale(1)`;
+      }
+
+      function hideCTA() {
+        if (currentCTAPhase === "hidden") return;
+        currentCTAPhase = "hidden";
+        cta.classList.remove("grow-fade-in");
+        cta.classList.add("is-hidden");
+      }
+
+      function showCTAGrowFadeIn() {
+        if (currentCTAPhase === "final") return;
+        currentCTAPhase = "final";
+        cta.classList.remove("is-hidden", "grow-fade-in");
+        /* Force the browser to restart the animation cleanly. */
+        void cta.offsetWidth;
+        cta.classList.add("grow-fade-in");
+      }
+
+      function syncCTAWithVideo() {
+        const time = video.currentTime || 0;
+
+        /* 0s to @@CTA_HIDE_AT@@s: CTA is visible immediately. */
+        if (time < CTA_HIDE_AT) {
+          showCTAInitial();
+          return;
+        }
+
+        /* @@CTA_HIDE_AT@@s to @@CTA_SHOW_AGAIN@@s: CTA is display:none. */
+        if (time >= CTA_HIDE_AT && time < CTA_SHOW_AGAIN_AT) {
+          hideCTA();
+          return;
+        }
+
+        /* @@CTA_SHOW_AGAIN@@s onwards: CTA grows and fades in. */
+        if (time >= CTA_SHOW_AGAIN_AT) {
+          showCTAGrowFadeIn();
+        }
+      }
+
+      function startVideoSyncLoop() {
+        cancelAnimationFrame(rafId);
+        function tick() {
+          syncCTAWithVideo();
+          if (!video.paused && !video.ended) {
+            rafId = requestAnimationFrame(tick);
+          }
+        }
+        tick();
+      }
+
+      window.addEventListener("resize", resizeStage);
+      video.addEventListener("loadedmetadata", syncCTAWithVideo);
+      video.addEventListener("timeupdate",     syncCTAWithVideo);
+      video.addEventListener("seeked",         syncCTAWithVideo);
+      video.addEventListener("play",           startVideoSyncLoop);
+      video.addEventListener("pause",          syncCTAWithVideo);
+      video.addEventListener("ended",          syncCTAWithVideo);
+
+      resizeStage();
+      syncCTAWithVideo();
+    </script>
+  </body>
+</html>
